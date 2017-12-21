@@ -9,7 +9,7 @@ function setup()
 	createCanvas(800, 800);
 	frameRate(fps);
 
-	let nodes = getNodeSample5();
+	let nodes = getNodeSample7();
 	delaunay(nodes);
 
 	background(000);
@@ -17,17 +17,19 @@ function setup()
 	edges.forEach((e) => renderEdge(e));
 }
 
-// function mousePressed()
-// {
-// 	nodes.push(new MapNode(mouseX, mouseY));
-// 	edges = [];
-//
-// 	delaunay(nodes);
-// 	background(000);
-// 	nodes.forEach((n) => n.render());
-//
-// 	edges.forEach((e) => renderEdge(e));
-// }
+function mousePressed()
+{
+	nodes.push(new MapNode(mouseX, mouseY));
+	edges = [];
+
+	console.log(nodes);
+
+	delaunay(nodes);
+	background(000);
+	nodes.forEach((n) => n.render());
+
+	edges.forEach((e) => renderEdge(e));
+}
 
 function draw()
 {}
@@ -109,6 +111,27 @@ function getNodeSample5()
 	return [m1, m2, m3, m4];
 }
 
+function getNodeSample6()
+{
+	let m1 = new MapNode(20, 20);
+	let m2 = new MapNode(100, 25);
+	let m3 = new MapNode(80, 15);
+	let m4 = new MapNode(200, 100);
+
+	return [m1, m2, m3, m4];
+}
+
+function getNodeSample7()
+{
+	let m1 = new MapNode(50, 100);
+	let m2 = new MapNode(150, 100);
+	let m3 = new MapNode(100, 80);
+	let m4 = new MapNode(100, 50);
+	let m5 = new MapNode(100, 20);
+
+	return [m1, m2, m3, m4, m5];
+}
+
 function getRandomNodes()
 {
 	let arr = [];
@@ -148,6 +171,8 @@ function addEdge(n1, n2)
 
 	if (!exists)
 		edges.push([smaller, larger]);
+
+	renderEdges();
 }
 
 function removeEdge(n1, n2)

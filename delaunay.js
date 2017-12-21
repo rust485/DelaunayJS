@@ -177,19 +177,23 @@ function getBase(leftNodes, rightNodes)
 	while (changed)
 	{
 		changed = false;
-		for (let i = 1; i < leftNodes.length - 1; i++)
+		let i = l + 1;
+		while (i < leftNodes.length)
 		{
 			if (!isLeft(leftNodes[l], rightNodes[r], leftNodes[i]))
 				l = i;
+			i++
 		}
 
-		for (let i = 1; i < rightNodes.length - 1; i++)
+		i = r + 1;
+		while (i < rightNodes.length)
 		{
 			if (isLeft(rightNodes[r], leftNodes[l], rightNodes[i]))
 			{
 				r = i;
 				changed = true;
 			}
+			i++;
 		}
 	}
 	if (l != 0) console.log(l);
@@ -314,9 +318,19 @@ function delaunay(nodes)
 	{
 		nodes.sort((a, b) => (a.position.x - b.position.x != 0) ? a.position.x - b.position.x : a.position.y - b.position.y);
 
-		let leftNodes = delaunay(nodes.slice(0, Math.floor(nodes.length / 2)));
-		let rightNodes = delaunay(nodes.slice(Math.floor(nodes.length / 2), nodes.length));
+		let leftNodes;
+		let rightNodes;
 
+		if (nodes.length === 4)
+		{
+			leftNodes = delaunay(nodes.slice(0, 3));
+			rightNodes = delaunay(nodes.slice(3, 4));
+		}
+		else
+		{
+			leftNodes = delaunay(nodes.slice(0, Math.floor(nodes.length / 2)));
+			rightNodes = delaunay(nodes.slice(Math.floor(nodes.length / 2), nodes.length));
+		}
 		let bases = getBase(leftNodes, rightNodes);
 
 		merge(leftNodes, rightNodes, bases.left, bases.right);
