@@ -272,7 +272,7 @@ function getPotential(a, b, list, cw)
 	return false;
 }
 
-function merge(leftNodes, rightNodes, leftBase, rightBase)
+function merge(leftNodes, rightNodes, leftBase, rightBase, edges)
 {
 	leftBase.addNeighbor(rightBase);
 	rightBase.addNeighbor(leftBase);
@@ -287,32 +287,33 @@ function merge(leftNodes, rightNodes, leftBase, rightBase)
 
 	if (!potentialLeft && !potentialRight) return;
 	else if (potentialLeft && !potentialRight)
-		merge(newLeft, newRight, potentialLeft, rightBase);
+		merge(newLeft, newRight, potentialLeft, rightBase, edges);
 	else if (potentialRight && !potentialLeft)
-		merge(newLeft, newRight, leftBase, potentialRight);
+		merge(newLeft, newRight, leftBase, potentialRight, edges);
 	else if (inCircle(leftBase, rightBase, potentialLeft, potentialRight) <= 0)
-		merge(newLeft, newRight, potentialLeft, rightBase);
+		merge(newLeft, newRight, potentialLeft, rightBase, edges);
 	else if (inCircle(leftBase, rightBase, potentialRight, potentialLeft) <= 0)
-		merge(newLeft, newRight, leftBase, potentialRight);
+		merge(newLeft, newRight, leftBase, potentialRight, edges);
 }
 
 // divide and conquer algorithm
 function delaunay(nodes)
 {
+	let edges = [];
 	if (nodes.length <= 3)
 	{
 		for (let i = 0; i < nodes.length; i++)
 		{
-			for (let j = 0; j < nodes.length; j++)
+			for (let j = i + 1; j < nodes.length; j++)
 			{
 				if (i != j)
 				{
 					nodes[i].addNeighbor(nodes[j]);
-					addEdge(nodes[i], nodes[j]);
+					edges.push(new Edge(nodes[i], nodes[j]));
 				}
 			}
 		}
-		return nodes;
+		return edges;
 	}
 	else
 	{
@@ -323,17 +324,20 @@ function delaunay(nodes)
 
 		if (nodes.length === 4)
 		{
-			leftNodes = delaunay(nodes.slice(0, 3));
-			rightNodes = delaunay(nodes.slice(3, 4));
+			leftNodes = nodes.slice(0, 3);
+			rightNodes = nodes.slice(3, 4);
 		}
 		else
 		{
-			leftNodes = delaunay(nodes.slice(0, Math.floor(nodes.length / 2)));
-			rightNodes = delaunay(nodes.slice(Math.floor(nodes.length / 2), nodes.length));
+			leftNodes = nodes.slice(0, Math.floor(nodes.length / 2));
+			rightNodes = nodes.slice(Math.floor(nodes.length / 2), nodes.length);
 		}
-		let bases = getBase(leftNodes, rightNodes);
 
-		merge(leftNodes, rightNodes, bases.left, bases.right);
+		let lEdges = delaunay(leftNodes);
+		let rEdges = delaunay(rightNodes);
+		let bases = getBases(leftNodes, rightNodes);
+
+		merge(leftNodes, rightNodes, bases.left, bases.right, edges);
 
 		return nodes;
 	}
