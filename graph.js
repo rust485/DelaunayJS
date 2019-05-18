@@ -117,11 +117,12 @@ class Node
   /**
    * Render this node in its x and y position
    * @method render
+   * @param {Number}  r the radius of the node to render
    */
-  render()
+  render(r)
   {
     fill(1000);
-    ellipse(this.position.x, this.position.y, WIDTH, HEIGHT);
+    ellipse(this.position.x, this.position.y, r, r);
   }
 }
 
@@ -186,6 +187,21 @@ class Graph
   addNode(n)
   {
     this.nodes[n.id] = n;
+    return this.nodes;
+  }
+
+  /**
+   * Add multiple nodes to this graph
+   * @method addNodes
+   * @param  {Node[]} arr the array of nodes to be added to this graph
+   * @return {Node[]}     list of nodes contained in this graph after the insertion
+   *                      of the nodes in arr
+   */
+  addNodes(arr)
+  {
+    for (let i = 0; i < arr.length; i++)
+      this.addNode(arr[i]);
+
     return this.nodes;
   }
 
@@ -261,12 +277,40 @@ class Graph
    * Renders this graphs nodes and edges
    * @method render
    */
-  render()
+  render(r)
   {
     for (let i = 0; i < this.nodes.length; i++)
-      this.nodes[i].render();
+      this.nodes[i].render(r);
 
     for (let i = 0; i < this.edges.length; i++)
       this.edges[i].render();
+  }
+
+  /**
+   * Reset edges and nodes to empty
+   * @method clear
+   */
+  clear()
+  {
+    this.clearEdges();
+    this.clearNodes();
+  }
+
+  /**
+   * Reset edges to empty arry
+   * @method clearEdges
+   */
+  clearEdges()
+  {
+    this.edges = [];
+  }
+
+  /**
+   * Reset nodes to empty dict
+   * @method clearNodes
+   */
+  clearNodes()
+  {
+    this.nodes = {};
   }
 }

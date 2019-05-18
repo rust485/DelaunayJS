@@ -1,14 +1,16 @@
 /**
  * This is the main file for the project, accepting user input and executing
- * accordingly. 
+ * accordingly.
  */
+
+const CANVAS_WIDTH = 800;
+const CANVAS_HEIGHT = 800;
+const NODE_R = 10;
 
 // the graph to be operated on
 let graph = new Graph();
 
-let i = 0;
 let fps = .25;
-let renderN = true;
 
 /**
  * Initialize the canvas and start the algorithm
@@ -16,15 +18,15 @@ let renderN = true;
  */
 function setup()
 {
-	createCanvas(800, 800);
+	createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
 	frameRate(fps);
 
 	let nodes = getNodeSample7();
-	delaunay(nodes);
+	graph.addNodes(nodes);
 
-	background(000);
-	nodes.forEach((n) => n.render());
-	edges.forEach((e) => renderEdge(e));
+	delaunay(graph);
+
+	render();
 }
 
 /**
@@ -34,93 +36,14 @@ function setup()
 function mousePressed()
 {
 	// create a new node at the current mouse position
-	nodes.push(new MapNode(mouseX, mouseY));
-
-	// recalculate delaunay
-	edges = delaunay(nodes);
-	background(000);
-
-
-	nodes.forEach((n) => n.render());
-	edges.forEach((e) => renderEdge(e));
+	graph.addNode(new Node(mouseX, mouseY));
+	render();
 }
-
-function draw()
-{}
 
 function render()
 {
 	background(000);
-	graph.render();
+	graph.render(NODE_R);
 }
 
-function renderNeighbors()
-{
-	background(000);
-	nodes.forEach((n) => n.render());
-	nodes.forEach((n) =>
-	{
-		n.neighbors.forEach((neighbor) =>
-		{
-			let e = [n, neighbor];
-			renderEdge(e);
-		})
-	});
-}
-
-function getRandomNodes()
-{
-	let arr = [];
-	let amtNodes = Math.floor((Math.random() * (100 - 1))) + 1;
-
-	for (i = 0; i < amtNodes; i++)
-	{
-		let x = Math.random() * (789 - 9) + 9;
-		let y = Math.random() * (789 - 9) + 9;
-		let m = new MapNode(x, y);
-		arr.push(m);
-	}
-
-	return arr;
-}
-
-function addEdge(n1, n2)
-{
-	let smaller = (n1.id < n2.id) ? n1 : n2;
-	let larger = (n1.id > n2.id) ? n1 : n2;
-	let exists = false;
-	for (let j = 0; j < edges.length; j++)
-	{
-		let edge = edges[j];
-		if (edge[0].id === smaller.id && edge[1].id === larger.id)
-		{
-			exists = true;
-			break;
-		}
-	}
-
-	if (!exists)
-		edges.push([smaller, larger]);
-
-	renderEdges();
-}
-
-function removeEdge(n1, n2)
-{
-	let smaller = (n1.id < n2.id) ? n1 : n2;
-	let larger = (n1.id > n2.id) ? n1 : n2;
-
-
-	let before = edges.length;
-	edges = edges.filter((e) => !(e[0].id === smaller.id && e[1].id === larger.id));
-	let after = edges.length;
-	if (before === after)
-	{
-		for (let j = 0; j < edges.length; j++)
-		{
-			let e = edges[j];
-			if (e[0].id === n1.id && e[1].id === n2.id || e[0].id === n2.id && e[1] === n1.id)
-				console.log("missed");
-		}
-	}
-}
+function draw() {}
