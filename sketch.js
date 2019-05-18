@@ -1,8 +1,14 @@
-let nodes = [];
+/**
+ * This is the main file for the project, accepting user input and executing
+ * accordingly. 
+ */
+
+// the graph to be operated on
+let graph = new Graph();
+
 let i = 0;
 let fps = .25;
 let renderN = true;
-let edges = [];
 
 /**
  * Initialize the canvas and start the algorithm
@@ -42,11 +48,10 @@ function mousePressed()
 function draw()
 {}
 
-function renderEdges()
+function render()
 {
 	background(000);
-	nodes.forEach((n) => n.render());
-	edges.forEach((e) => renderEdge(e));
+	graph.render();
 }
 
 function renderNeighbors()
@@ -77,12 +82,6 @@ function getRandomNodes()
 	}
 
 	return arr;
-}
-
-function renderEdge(edge)
-{
-	stroke(1000);
-	line(edge[0].position.x, edge[0].position.y, edge[1].position.x, edge[1].position.y);
 }
 
 function addEdge(n1, n2)
