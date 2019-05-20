@@ -16,6 +16,16 @@ class Node
     this.id = Math.random();
   }
 
+  getX()
+  {
+    return this.position.x;
+  }
+
+  getY()
+  {
+    return this.position.y;
+  }
+
   /**
    * Calculate the distance between this node and a given node
    * @method distanceFrom
@@ -124,6 +134,13 @@ class Node
     fill(1000);
     ellipse(this.position.x, this.position.y, r, r);
   }
+
+  static lexicographicalComparator(n1, n2)
+  {
+    if (n1.position.x != n2.position.x)
+      return n2.position.x - n1.position.x;
+    return n2.position.y - n1.position.y;
+  }
 }
 
 /**
@@ -135,6 +152,21 @@ class Edge
   {
     this.n1 = n1;
     this.n2 = n2;
+  }
+
+  reversed()
+  {
+    return new Edge(this.n2, this.n1);
+  }
+
+  first()
+  {
+    return this.n1;
+  }
+
+  second()
+  {
+    return this.n2;
   }
 
   /**
@@ -163,6 +195,20 @@ class Edge
   {
     return (this.n1.id === e.n1.id || this.n1.id === e.n2.id) &&
       (this.n2.id === e.n1.id || this.n2.id === e.n2.id);
+  }
+
+  set(e)
+  {
+    this.n1 = e.n1;
+    this.n2 = e.n2;
+  }
+
+  static connect(a, b)
+  {
+    const e = new Edge(a.second(), b.first());
+    Edge.splice(e, a.lNext);
+    Edge.splice(e.reversed(), b)
+    return e;
   }
 }
 
@@ -232,20 +278,20 @@ class Graph
    * @param  {Node} n2 second node
    * @return {Edge[]} the list of edges in this graph
    */
-  addEdge(n1, n2)
+  addEdge(e)
   {
-    n1.addNeighbor(n2);
-    n2.addNeighbor(n1);
+    e.first().addNeighbor(e.second());
+    e.second().addNeighbor(e.first());
 
     // ensure that both n1 and n2 are already in the graph
     // if not, add to the graph
-    if (!this.containsNode(n1))
-      this.addNode(n1);
+    if (!this.containsNode(e.first()))
+      this.addNode(e.first());
 
-    if (!this.containsNode(n2))
-      this.addNode(n2);
+    if (!this.containsNode(e.second()))
+      this.addNode(e.second());
 
-    this.edges.push(new Edge(n1, n2));
+    this.edges.push(e);
 
     return this.edges;
   }
@@ -279,8 +325,9 @@ class Graph
    */
   render(r)
   {
-    for (let i = 0; i < this.nodes.length; i++)
-      this.nodes[i].render(r);
+    const nodes = this.getNodes();
+    for (let i = 0; i < nodes.length; i++)
+      nodes[i].render(r);
 
     for (let i = 0; i < this.edges.length; i++)
       this.edges[i].render();
@@ -312,5 +359,15 @@ class Graph
   clearNodes()
   {
     this.nodes = {};
+  }
+
+  getNodes()
+  {
+    const arr = [];
+
+    for (let id in this.nodes)
+      arr.push(this.nodes[id]);
+
+    return arr;
   }
 }

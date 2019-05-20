@@ -4,6 +4,7 @@ const MIN_NODES = 1;
 
 function getNodeSample1()
 {
+	/* a square*/
 	let n1 = new Node(10, 10);
 	let n2 = new Node(110, 110);
 	let n3 = new Node(10, 110);
@@ -14,6 +15,7 @@ function getNodeSample1()
 
 function getNodeSample2()
 {
+	/* a square inside a square*/
 	let n1 = new Node(10, 10);
 	let n2 = new Node(110, 110);
 	let n3 = new Node(10, 110);
@@ -29,6 +31,7 @@ function getNodeSample2()
 
 function getNodeSample3()
 {
+	/*a horizontal line, above and left of a vertical line */
 	let n1 = new Node(10, 10);
 	let n2 = new Node(30, 10);
 	let n3 = new Node(100, 100);
@@ -39,6 +42,7 @@ function getNodeSample3()
 
 function getNodeSample4()
 {
+	/* a square with a dot inside (not centered)*/
 	let n1 = new Node(10, 10);
 	let n2 = new Node(100, 100);
 	let n3 = new Node(10, 100);
@@ -50,6 +54,7 @@ function getNodeSample4()
 
 function getNodeSample5()
 {
+	/*sideways, disjointed T*/
 	let n1 = new Node(10, 10);
 	let n2 = new Node(10, 100);
 	let n3 = new Node(55, 55);
@@ -60,6 +65,7 @@ function getNodeSample5()
 
 function getNodeSample6()
 {
+	/*rotated trapezoid*/
 	let n1 = new Node(20, 20);
 	let n2 = new Node(100, 25);
 	let n3 = new Node(80, 15);
@@ -70,6 +76,7 @@ function getNodeSample6()
 
 function getNodeSample7()
 {
+	/*triangle with a small, vertical line in the center*/
 	let n1 = new Node(50, 100);
 	let n2 = new Node(150, 100);
 	let n3 = new Node(100, 80);

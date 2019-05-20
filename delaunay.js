@@ -1,105 +1,3 @@
-WIDTH = 10;
-HEIGHT = 10;
-
-class Edge
-{
-	/**
-	 * line segment with endpoint at 2 distinct nodes
-	 * @method constructor
-	 * @param  {MapNode}    n1 first node
-	 * @param  {MapNode}    n2 second node
-	 */
-	constructor(n1, n2)
-	{
-		this.n1 = n1;
-		this.n2 = n2;
-	}
-
-	first()
-	{
-		return this.n1;
-	}
-
-	second()
-	{
-		return this.n2;
-	}
-}
-
-class MapNode
-{
-	constructor(x, y)
-	{
-		this.position = new Vector(x, y);
-		this.neighbors = [];
-		this.id = Math.random();
-	}
-
-	distance(n)
-	{
-		return this.position.distance(n.position);
-	}
-
-	inNeighbor(n)
-	{
-		for (let i = 0; i < this.neighbors.length; i++)
-		{
-			if (this.neighbors[i] === n)
-				return true;
-		}
-
-		return false;
-	}
-
-	addNeighbor(n)
-	{
-		this.neighbors = this.neighbors.filter((node) => node != n);
-		this.neighbors.push(n);
-	}
-
-	addNeighbors(arr)
-	{
-		let self = this;
-		arr.forEach((n) => self.neighbors.push(n));
-	}
-
-	removeNeighbor(n)
-	{
-		this.neighbors = this.neighbors.filter((neighbor) => neighbor != n);
-	}
-
-	equals(n)
-	{
-		return this.position.x === n.position.x && this.position.y === n.position.y;
-	}
-
-	render()
-	{
-		fill(1000);
-		ellipse(this.position.x, this.position.y, WIDTH, HEIGHT);
-	}
-}
-
-class Edge
-{
-	constructor(a, b)
-	{
-		this.a = a;
-		this.b = b;
-	}
-
-	equals(e)
-	{
-		return this.a === e.a && this.b === e.b || this.a === e.b && this.b === e.a;
-	}
-
-	render()
-	{
-		fill(1000);
-		line(a.position.x, a.position.y, b.position.x, b.position.y);
-	}
-}
-
 // if d is in the circle formed by points a, b, and c, return > 0
 // d is on circle, return 0
 // d is outside of circle, return < 0
@@ -236,98 +134,144 @@ function sortSmallestAngle(a, b, list, cw)
 // a is in list, b is in the other list
 function getPotential(a, b, list, cw)
 {
-	sortSmallestAngle(b, a, list, cw);
-	for (let i = 0; i < list.length - 1; i++)
-	{
-		let angle = angleBetween(b, a, list[i], cw);
-		if (angle > 180) return false;
-		else if (inCircle(a, b, list[i], list[i + 1]) <= 0)
-			return list[i];
-		else
-		{
-			a.removeNeighbor(list[i]);
-			list[i].removeNeighbor(a);
-			removeEdge(a, list[i]);
-		}
-	}
 
-	let potential = list[list.length - 1];
-	if (potential)
-	{
-		let angle = angleBetween(b, a, potential, cw);
-		if (angle > 180) return false;
-		return potential;
-	}
-	return false;
 }
 
 function merge(leftNodes, rightNodes, leftBase, rightBase, edges)
 {
-	leftBase.addNeighbor(rightBase);
-	rightBase.addNeighbor(leftBase);
 
-	addEdge(leftBase, rightBase);
+}
 
-	let newLeft = leftNodes.filter((n) => !n.equals(leftBase));
-	let newRight = rightNodes.filter((n) => !n.equals(rightBase));
+function ccw(a, b, c)
+{
+	const mat = [
+		[a.getX(), a.getY(), 1],
+		[b.getX(), b.getY(), 1],
+		[c.getX(), c.getY(), 1]
+	];
 
-	let potentialLeft = getPotential(leftBase, rightBase, newLeft, false);
-	let potentialRight = getPotential(rightBase, leftBase, newRight, true);
-
-	if (!potentialLeft && !potentialRight) return;
-	else if (potentialLeft && !potentialRight)
-		merge(newLeft, newRight, potentialLeft, rightBase, edges);
-	else if (potentialRight && !potentialLeft)
-		merge(newLeft, newRight, leftBase, potentialRight, edges);
-	else if (inCircle(leftBase, rightBase, potentialLeft, potentialRight) <= 0)
-		merge(newLeft, newRight, potentialLeft, rightBase, edges);
-	else if (inCircle(leftBase, rightBase, potentialRight, potentialLeft) <= 0)
-		merge(newLeft, newRight, leftBase, potentialRight, edges);
+	return determinantSqMat(mat) > 0;
 }
 
 // divide and conquer algorithm
-function delaunay(nodes)
+function delaunay(graph)
 {
-	let edges = [];
-	if (nodes.length <= 3)
+	const nodes = graph.getNodes();
+
+	nodes.sort(Node.lexicographicalComparator);
+
+	delaunayRec(graph, nodes);
+}
+
+function leftOf(node, edge)
+{
+
+}
+
+function rightOf(node, edge)
+{
+
+}
+
+function valid()
+{
+
+}
+
+function delaunayRec(graph, nodes)
+{
+	if (nodes.length < 2)
+		return [];
+	if (nodes.length === 2)
 	{
-		for (let i = 0; i < nodes.length; i++)
+		const a = new Edge(nodes[0], nodes[1]);
+		graph.addEdge(a);
+		return [a, a.reversed()];
+	}
+
+	if (nodes.length === 3)
+	{
+		const a = new Edge(nodes[0], nodes[1]);
+		graph.addEdge(a);
+		const b = new Edge(nodes[1], nodes[2]);
+		graph.addEdge(b);
+		// TODO: splice?
+
+		if (ccw(nodes[0], nodes[1], nodes[2]))
 		{
-			for (let j = i + 1; j < nodes.length; j++)
+			const c = Edge.connect(b, a);
+			graph.addEdge(c);
+			return [a, b.reversed()];
+		}
+
+		if (ccw(nodes[0], nodes[2], nodes[1]))
+		{
+			const c = Edge.connect(b, a);
+			graph.addEdge(c);
+			return [c.reversed(), c];
+		}
+
+		return [a, b.reversed()];
+	}
+
+	const split = Math.floor(nodes.length / 2);
+
+	// left = [ldo, ldi]
+	const left = delaunayRec(graph, nodes.slice(0, split))
+	// right = [rdi, rdo]
+	const right = delaunayRec(graph, nodes.slice(split, nodes.length));
+
+	while (true)
+	{
+		if (leftOf(right[0].first(), left[1]))
+			ldi = ldi.lnext; // what?
+		else if (rightOf(left[1].first(), right[0]))
+			rdi = rdi.rprev; // again wut?
+		else
+			break;
+	}
+
+	const basel = Edge.connect(right[0].reversed(), left[1]);
+	if (left[1].first() === left[0].first())
+		left[0].set(basel.reversed());
+	if (right[0].first() === right[1].first())
+		right[1].set(basel);
+
+	while (true)
+	{
+		const lcand = basel.reversed().onext // what
+		if (valid(lcand)) // TODO: valid
+		{
+			// TODO: inCircle
+			while (inCircle(basel.second(), basel.first(), lcand.second(), lcand.Onext.second()))
 			{
-				if (i != j)
-				{
-					nodes[i].addNeighbor(nodes[j]);
-					edges.push(new Edge(nodes[i], nodes[j]));
-				}
+				const t = lcand.Onext;
+				graph.removeEdge(lcand);
+				lcand = t;
 			}
 		}
-		return edges;
-	}
-	else
-	{
-		nodes.sort((a, b) => (a.position.x - b.position.x != 0) ? a.position.x - b.position.x : a.position.y - b.position.y);
 
-		let leftNodes;
-		let rightNodes;
-
-		if (nodes.length === 4)
+		const rcand = basel.Oprev;
+		if (valid(rcand))
 		{
-			leftNodes = nodes.slice(0, 3);
-			rightNodes = nodes.slice(3, 4);
+			while (inCircle(basel.second(), basel.first(), lcand.second(), lcand.Onext.second()))
+			{
+				const t = rcand.Oprev;
+				graph.removeEdge(rcand);
+				rcand = t;
+			}
 		}
+
+		if (!valid(lcand) && !valid(rcand))
+			break;
+
+		if (!valid(lcand) || (valid(rcand) &&
+			inCircle(lcand.second(), lcand.first(), rcand.first(), rcand.second())))
+				basel = Edge.connect(rcand, basel.reversed());
+
 		else
-		{
-			leftNodes = nodes.slice(0, Math.floor(nodes.length / 2));
-			rightNodes = nodes.slice(Math.floor(nodes.length / 2), nodes.length);
-		}
-
-		let lEdges = delaunay(leftNodes);
-		let rEdges = delaunay(rightNodes);
-		let bases = getBases(leftNodes, rightNodes);
-
-		merge(leftNodes, rightNodes, bases.left, bases.right, edges);
-
-		return nodes;
+			basel = Edge.connect(basel.reversed(), lcand.reversed());
 	}
+
+	return [left[0], right[1]];
 }

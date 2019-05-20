@@ -21,8 +21,7 @@ function setup()
 	createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
 	frameRate(fps);
 
-	let nodes = getNodeSample7();
-	graph.addNodes(nodes);
+	graph.addNodes([]);
 
 	delaunay(graph);
 
@@ -37,13 +36,16 @@ function mousePressed()
 {
 	// create a new node at the current mouse position
 	graph.addNode(new Node(mouseX, mouseY));
+	delaunay(graph);
 	render();
 }
 
 function render()
 {
+	console.log("rendering");
 	background(000);
 	graph.render(NODE_R);
+	console.log(graph.getNodes());
 }
 
 function draw() {}
