@@ -153,6 +153,30 @@ function ccw(a, b, c)
 	return determinantSqMat(mat) > 0;
 }
 
+function inCircle(a, b, c, d)
+{
+	const ax = a.getX();
+	const ay = a.getY();
+
+	const bx = b.getX();
+	const by = b.getY();
+
+	const cx = c.getX();
+	const cy = c.getY();
+
+	const dx = d.getX();
+	const dy = d.getY();
+
+	const mat = [
+		[ax, ay, ax * ax + ay * ay, 1],
+		[bx, by, bx * bx + by * by, 1],
+		[cx, cy, cx * cx + cy * cy, 1],
+		[dx, dy, dx * dx + dy * dy, 1],
+	]
+
+	return determinantSqMat(mat) > 0;
+}
+
 // divide and conquer algorithm
 function delaunay(graph)
 {
@@ -165,21 +189,22 @@ function delaunay(graph)
 
 function leftOf(node, edge)
 {
-
+	return ccw(node, edge.first(), edge.second());
 }
 
 function rightOf(node, edge)
 {
-
+	return ccw(node, edge.second(), edge.first());
 }
 
-function valid()
+function valid(edge, basel)
 {
-
+	return ccw(edge.second(), basel);
 }
 
 function delaunayRec(graph, nodes)
 {
+	// TODO: figure out what onext, and lnext are for
 	if (nodes.length < 2)
 		return [];
 	if (nodes.length === 2)
@@ -218,54 +243,58 @@ function delaunayRec(graph, nodes)
 
 	// left = [ldo, ldi]
 	const left = delaunayRec(graph, nodes.slice(0, split))
+	let ldo = left[0];
+	let ldi = left[1];
+
 	// right = [rdi, rdo]
 	const right = delaunayRec(graph, nodes.slice(split, nodes.length));
+	let rdo = right[1];
+	let rdi = right[0];
 
 	while (true)
 	{
-		if (leftOf(right[0].first(), left[1]))
+		if (leftOf(rdi.first(), ldi))
 			ldi = ldi.lnext; // what?
-		else if (rightOf(left[1].first(), right[0]))
+		else if (rightOf(ldi.first(), rdi))
 			rdi = rdi.rprev; // again wut?
 		else
 			break;
 	}
 
-	const basel = Edge.connect(right[0].reversed(), left[1]);
-	if (left[1].first() === left[0].first())
-		left[0].set(basel.reversed());
-	if (right[0].first() === right[1].first())
-		right[1].set(basel);
+	const basel = Edge.connect(rdi.reversed(), ldi);
+	if (ldi.first() === ldo.first())
+		ldo.set(basel.reversed());
+	if (rdi.first() === rdo.first())
+		rdo.set(basel);
 
 	while (true)
 	{
 		const lcand = basel.reversed().onext // what
-		if (valid(lcand)) // TODO: valid
+		if (valid(lcand, basel))
 		{
-			// TODO: inCircle
-			while (inCircle(basel.second(), basel.first(), lcand.second(), lcand.Onext.second()))
+			while (inCircle(basel.second(), basel.first(), lcand.second(), lcand.onext.second())) // figure out what onext is
 			{
-				const t = lcand.Onext;
+				const t = lcand.onext; // figure out what onext is
 				graph.removeEdge(lcand);
 				lcand = t;
 			}
 		}
 
-		const rcand = basel.Oprev;
-		if (valid(rcand))
+		const rcand = basel.oprev; // figure out what oprev is
+		if (valid(rcand, basel))
 		{
-			while (inCircle(basel.second(), basel.first(), lcand.second(), lcand.Onext.second()))
+			while (inCircle(basel.second(), basel.first(), lcand.second(), lcand.onext.second())) // figure out what onext is
 			{
-				const t = rcand.Oprev;
+				const t = rcand.oprev; // figure out what oprev is
 				graph.removeEdge(rcand);
 				rcand = t;
 			}
 		}
 
-		if (!valid(lcand) && !valid(rcand))
+		if (!valid(lcand, basel) && !valid(rcand, basel))
 			break;
 
-		if (!valid(lcand) || (valid(rcand) &&
+		if (!valid(lcand, basel) || (valid(rcand, basel) &&
 			inCircle(lcand.second(), lcand.first(), rcand.first(), rcand.second())))
 				basel = Edge.connect(rcand, basel.reversed());
 

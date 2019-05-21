@@ -206,8 +206,6 @@ class Edge
   static connect(a, b)
   {
     const e = new Edge(a.second(), b.first());
-    Edge.splice(e, a.lNext);
-    Edge.splice(e.reversed(), b)
     return e;
   }
 }
