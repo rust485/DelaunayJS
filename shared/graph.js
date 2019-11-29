@@ -105,7 +105,7 @@ class Node
    */
   equals(n)
   {
-    return this.id === n.id;
+    return (n.x === this.x) && (n.y === this.y);
   }
 
   /**
@@ -193,8 +193,8 @@ class Edge
 
   equals(e)
   {
-    return (this.n1.id === e.n1.id || this.n1.id === e.n2.id) &&
-      (this.n2.id === e.n1.id || this.n2.id === e.n2.id);
+    return (this.n1.equals(e.n1) && this.n2.equals(e.n2)) ||
+      (this.n1.equals(e.n2) && this.n2.equals(e.n1));
   }
 
   set(e)
@@ -219,6 +219,30 @@ class Graph
   {
     this.edges = [];
     this.nodes = {};
+    this.lookupByXY = {};
+  }
+
+  static fromTriangles(triangles)
+  {
+    let g = new Graph();
+    for (let t in triangles)
+    {
+      let points = t.getPoints();
+
+      let n1 = new Node(points[0].x, points[0].y)
+      let n2 = new Node(points[1].x, points[1].y)
+      let n3 = new Node(points[2].x, points[2].y)
+
+      let e1 = new Edge(n1, n2);
+      let e2 = new Edge(n2, n3);
+      let e3 = new Edge(n3, n1);
+
+      g.addEdge(e1);
+      g.addEdge(e2);
+      g.addEdge(e3);
+    }
+
+    return g;
   }
 
   /**
@@ -230,6 +254,22 @@ class Graph
    */
   addNode(n)
   {
+    let x = n.getX();
+    let y = n.getY();
+
+    if (this.lookupByXY[x] !== undefined)
+    {
+      if (this.lookupByXY[y] !== undefined)
+        return;
+      else
+        this.lookupByXY[x][y] = n;
+    }
+    else
+    {
+      this.lookupByXY[x] = {};
+      this.lookupByXY[x][y] = n;
+    }
+
     this.nodes[n.id] = n;
     return this.nodes;
   }
@@ -259,6 +299,8 @@ class Graph
   removeNode(n)
   {
     delete this.nodes[n.id];
+    let x = n.getX();
+    let y = n.getY();
 
     // ensures that no references to the node are left over
     // after removing the node from the graph
@@ -266,6 +308,7 @@ class Graph
     for (let i = 0; i < this.nodes.length; i++)
       this.nodes[i].removeNeighbor(n);
 
+    delete this.lookupByXY[x][y];
     return this.nodes;
   }
 
@@ -314,7 +357,12 @@ class Graph
    */
   containsNode(node)
   {
-    return this.nodes[node.id] !== undefined;
+    let x = node.getX();
+    let y = node.getY();
+
+    if (this.lookupByXY[x] !== undefined)
+      return this.lookupByXY[x][y] !== undefined;
+    return false;
   }
 
   /**

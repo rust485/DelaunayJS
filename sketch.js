@@ -7,6 +7,8 @@ const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 800;
 const NODE_R = 10;
 
+const triangulator = new IncrementalDelaunay();
+
 // the graph to be operated on
 let graph = new Graph();
 
@@ -21,10 +23,10 @@ function setup()
 	createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
 	frameRate(fps);
 
-	graph.addNodes([]);
+  let points = getNodeSample1();
+  let triangles = triangulator.calculateDelaunay(points);
 
-	delaunay(graph);
-
+  graph = Graph.fromTriangles(triangles);
 	render();
 }
 
@@ -42,7 +44,6 @@ function mousePressed()
 
 function render()
 {
-	console.log("rendering");
 	background(000);
 	graph.render(NODE_R);
 	console.log(graph.getNodes());
