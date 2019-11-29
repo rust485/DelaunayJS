@@ -277,6 +277,7 @@ function delaunayRec(graph, nodes)
 				const t = lcand.onext; // figure out what onext is
 				graph.removeEdge(lcand);
 				lcand = t;
+				graph.addEdge(lcand);
 			}
 		}
 
@@ -288,6 +289,7 @@ function delaunayRec(graph, nodes)
 				const t = rcand.oprev; // figure out what oprev is
 				graph.removeEdge(rcand);
 				rcand = t;
+				graph.addEdge(rcand);
 			}
 		}
 
@@ -300,6 +302,8 @@ function delaunayRec(graph, nodes)
 
 		else
 			basel = Edge.connect(basel.reversed(), lcand.reversed());
+
+		graph.addEdge(basel);
 	}
 
 	return [left[0], right[1]];
