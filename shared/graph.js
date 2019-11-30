@@ -225,7 +225,7 @@ class Graph
   static fromTriangles(triangles)
   {
     let g = new Graph();
-    for (let t in triangles)
+    for (let t of triangles)
     {
       let points = t.getPoints();
 
@@ -259,7 +259,7 @@ class Graph
 
     if (this.lookupByXY[x] !== undefined)
     {
-      if (this.lookupByXY[y] !== undefined)
+      if (this.lookupByXY[x][y] !== undefined)
         return;
       else
         this.lookupByXY[x][y] = n;
@@ -413,6 +413,16 @@ class Graph
 
     for (let id in this.nodes)
       arr.push(this.nodes[id]);
+
+    return arr;
+  }
+
+  getPoints()
+  {
+    const arr = [];
+
+    for (let id in this.nodes)
+      arr.push(this.nodes[id].position)
 
     return arr;
   }

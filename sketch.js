@@ -7,7 +7,7 @@ const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 800;
 const NODE_R = 10;
 
-const triangulator = new IncrementalDelaunay();
+const triangulator = new IncrementalDelaunay([]);
 
 // the graph to be operated on
 let graph = new Graph();
@@ -24,9 +24,8 @@ function setup()
 	frameRate(fps);
 
   let points = getNodeSample1();
-  let triangles = triangulator.calculateDelaunay(points);
 
-  graph = Graph.fromTriangles(triangles);
+  calculate(points);
 	render();
 }
 
@@ -37,16 +36,26 @@ function setup()
 function mousePressed()
 {
 	// create a new node at the current mouse position
-	graph.addNode(new Node(mouseX, mouseY));
-	delaunay(graph);
+	let p = new Vector(mouseX, mouseY);
+
+  let points = graph.getPoints();
+  points.push(p);
+  calculate(points);
 	render();
+}
+
+function calculate(points)
+{
+  triangulator.setPoints(points);
+  let triangles = triangulator.calculateDelaunay();
+  graph = Graph.fromTriangles(triangles);
+  render();
 }
 
 function render()
 {
 	background(000);
 	graph.render(NODE_R);
-	console.log(graph.getNodes());
 }
 
 function draw() {}

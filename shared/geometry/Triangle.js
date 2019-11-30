@@ -10,6 +10,16 @@ class Triangle
     return this.points;
   }
 
+  contains(pt)
+  {
+    for (let point of this.points)
+    {
+      if (point.equals(pt))
+        return true;
+    }
+    return false;
+  }
+
   pointIsInside(point)
   {
     let p1 = this.points[0];

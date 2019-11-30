@@ -7,9 +7,9 @@ class TriangleTree
 
   getContainingNode(pt)
   {
-    for (let n in this.nodes)
+    for (let n of this.nodes)
     {
-      let container = n.getContainingChild(pt);
+      let container = n.getContainingNode(pt);
 
       if (container !== null)
         return container;
@@ -29,9 +29,9 @@ class TriangleTree
   leaves()
   {
     let leaves = [];
-    for (let n in this.nodes)
+    for (let n of this.nodes)
     {
-      leaves = leaves.append(n.getLeaves());
+      leaves = leaves.concat(n.getLeaves());
     }
 
     return leaves;
@@ -66,13 +66,13 @@ class TriangleTreeNode
     this.children.push(c);
   }
 
-  getContainingChild(pt)
+  getContainingNode(pt)
   {
     if (this.containsPoint(pt))
     {
-      for (let c in this.children)
+      for (let c of this.children)
       {
-        let container = c.getContainingChild(pt);
+        let container = c.getContainingNode(pt);
 
         if (container !== null)
           return container;
@@ -86,10 +86,10 @@ class TriangleTreeNode
   getLeaves()
   {
     if (this.children.length === 0)
-      return [this];
+      return [this.triangle];
 
     let leaves = [];
-    for (let c in this.children)
+    for (let c of this.children)
       leaves = leaves.concat(c.getLeaves());
 
     return leaves;
