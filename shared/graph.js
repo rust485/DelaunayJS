@@ -64,7 +64,7 @@ class Node
    */
   addNeighbor(n)
   {
-    if (this.neighbors[n.id] !== undefined)
+    if (this.neighbors[n.id] === undefined)
       this.neighbors[n.id] = n;
     return this.neighbors;
   }
