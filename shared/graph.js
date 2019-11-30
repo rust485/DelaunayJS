@@ -14,6 +14,7 @@ class Node
     this.position = new Vector(x, y);
     this.neighbors = {};
     this.id = Math.random();
+    this.neighborLookupByXY = {};
   }
 
   getX()
@@ -24,6 +25,14 @@ class Node
   getY()
   {
     return this.position.y;
+  }
+
+  getNeighbor(x, y)
+  {
+    if (this.neighborLookupByXY[x] !== undefined &&
+      this.neighborLookupByXY[x][y] !== undefined)
+      return this.neighborLookupByXY[x][y];
+    return null;
   }
 
   /**
@@ -38,23 +47,6 @@ class Node
   }
 
   /**
-   * Checks if n is a neighbor of
-   * @method isNeighbor
-   * @param  {Node}      n the other node to check
-   * @return {Boolean}     true if the other node is a neighbor, false otherwise
-   */
-  isNeighbor(n)
-  {
-    for (let i = 0; i < this.neighbors.length; i++)
-    {
-      if (this.neighbors[i] === n)
-        return true;
-    }
-
-    return false;
-  }
-
-  /**
    * Add a single neighbor to the neighbors list.
    * If the neighbor is already in this nodes neighbors,
    * do nothing.
@@ -64,9 +56,23 @@ class Node
    */
   addNeighbor(n)
   {
-    if (this.neighbors[n.id] === undefined)
-      this.neighbors[n.id] = n;
+    if (this.getNeighbor(n.position.x, n.position.y) === null)
+      this.addNeighborCore(n);
     return this.neighbors;
+  }
+
+  addNeighborCore(n)
+  {
+    if (this.neighborLookupByXY[n.position.x] === undefined)
+      this.neighborLookupByXY[n.position.x] = {}
+    this.neighborLookupByXY[n.position.x][n.position.y] = n;
+    this.neighbors[n.id] = n;
+  }
+
+  hasNeighbor(n)
+  {
+    return this.neighborLookupByXY[n.position.x] !== undefined &&
+      this.neighborLookupByXY[n.position.x][n.position.y] !== undefined;
   }
 
   /**
@@ -93,7 +99,8 @@ class Node
    */
   removeNeighbor(n)
   {
-    delete this.neighbors[n.id];
+    if (this.neighborLookupByXY[x] !== undefined)
+      delete this.neighborLookupByXY[x][y];
     return this.neighbors;
   }
 
@@ -105,7 +112,7 @@ class Node
    */
   equals(n)
   {
-    return (n.x === this.x) && (n.y === this.y);
+    return (n.position.x === this.position.x) && (n.position.y === this.position.y);
   }
 
   /**
@@ -119,9 +126,9 @@ class Node
    */
   compareTo(n)
   {
-    if (this.x !== n.x)
-      return this.x - n.x;
-    return this.y - n.y;
+    if (this.position.x !== n.position.x)
+      return this.position.x - n.position.x;
+    return this.position.y - n.position.y;
   }
 
   /**
@@ -257,20 +264,14 @@ class Graph
     let x = n.getX();
     let y = n.getY();
 
-    if (this.lookupByXY[x] !== undefined)
-    {
-      if (this.lookupByXY[x][y] !== undefined)
-        return;
-      else
-        this.lookupByXY[x][y] = n;
-    }
-    else
-    {
+    if (this.lookupByXY[x] === undefined)
       this.lookupByXY[x] = {};
+    if (this.lookupByXY[x][y] === undefined)
+    {
       this.lookupByXY[x][y] = n;
+      this.nodes[n.id] = n;
     }
 
-    this.nodes[n.id] = n;
     return this.nodes;
   }
 
@@ -299,8 +300,6 @@ class Graph
   removeNode(n)
   {
     delete this.nodes[n.id];
-    let x = n.getX();
-    let y = n.getY();
 
     // ensures that no references to the node are left over
     // after removing the node from the graph
@@ -308,8 +307,16 @@ class Graph
     for (let i = 0; i < this.nodes.length; i++)
       this.nodes[i].removeNeighbor(n);
 
-    delete this.lookupByXY[x][y];
+    if (this.lookupByXY[n.getX()] !== undefined)
+      delete this.lookupByXY[n.getX()][n.getY()];
     return this.nodes;
+  }
+
+  getNode(x,y)
+  {
+    if (this.lookupByXY[x] !== undefined && this.lookupByXY[x][y] !== undefined)
+      return this.lookupByXY[x][y];
+    return null;
   }
 
   /**
@@ -321,16 +328,28 @@ class Graph
    */
   addEdge(e)
   {
-    e.first().addNeighbor(e.second());
-    e.second().addNeighbor(e.first());
+    let ef = e.first();
+    let es = e.second();
 
-    // ensure that both n1 and n2 are already in the graph
-    // if not, add to the graph
-    if (!this.containsNode(e.first()))
-      this.addNode(e.first());
+    let n1 = this.getNode(ef.getX(), ef.getY());
+    if (n1 === null)
+    {
+      n1 = ef;
+      this.addNode(n1);
+    }
 
-    if (!this.containsNode(e.second()))
-      this.addNode(e.second());
+    let n2 = this.getNode(es.getX(), es.getY());
+    if (n2 === null)
+    {
+      n2 = es;
+      this.addNode(n2);
+    }
+
+    if (n1.hasNeighbor(n2))
+      return this.edges;
+
+    n1.addNeighbor(e.second());
+    n2.addNeighbor(e.first());
 
     this.edges.push(e);
 
